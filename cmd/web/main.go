@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hodanov/snippetbox/pkg/models/mysql"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	snippets *mysql.SnippetModel
 }
 
 func openDB(dsn string) (*sql.DB, error) {
@@ -33,7 +35,6 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	// Initialize database connections.
 	db, err := openDB(*dsn)
 	if err != nil {
 		errorLog.Fatal(err)
@@ -43,6 +44,7 @@ func main() {
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		snippets: &mysql.SnippetModel{DB: db},
 	}
 
 	srv := &http.Server{
