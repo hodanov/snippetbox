@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hodanov/snippetbox/pkg/models"
-	"html/template"
 	"net/http"
 	"strconv"
 )
