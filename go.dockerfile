@@ -11,3 +11,5 @@ RUN apk --no-cache update \
     && go get github.com/oxequa/realize \
     # MySQL driver
     && go get github.com/go-sql-driver/mysql
+    # Alice (provides a convenient way to chain HTTP middleware functions)
+    && go get github.com/justinas/alice
