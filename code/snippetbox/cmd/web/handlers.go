@@ -38,7 +38,13 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Use the PopString() method to retrieve the value for the "flash" key.
+	// PopString() also deletes the key and value from the session data, so it acts like a one-time fetch.
+	// If there's no matching key in the session data this will return the empty string.
+	flash := app.session.PopString(r, "flash")
+
 	app.render(w, r, "show.page.tmpl", &templateData{
+		Flash:   flash,
 		Snippet: s,
 	})
 }
@@ -73,6 +79,10 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
+	// Use the Put() method to add a string value and the corresponding key ("flash") to the session data.
+	// If there's no existing session for the current user ( or thir session has expired) then a new, empty, session for them will automatically be created by the session middleware.
+	app.session.Put(r, "flash", "Snippet seccessfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
