@@ -14,7 +14,7 @@ type UserModel struct {
 }
 
 func (m *UserModel) Insert(name, email, password string) error {
-	hashdPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 	// If it does, the error will be assigned to eht mySQLError variable.
 	// We can then check whether or not the error relates to our users_uc_email key by checking the contents of the message string.
 	// If it does, we return an ErrDuplicateEmail error.
-	_, err = m.DB.Exec(stmt, name, email, string(hashdPassword))
+	_, err = m.DB.Exec(stmt, name, email, string(hashedPassword))
 	if err != nil {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
