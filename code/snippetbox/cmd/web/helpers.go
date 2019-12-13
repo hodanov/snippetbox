@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/justinas/nosurf"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -27,12 +28,17 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	if td == nil {
 		td = &templateData{}
 	}
+
+	td.CSRFToken = nosurf.Token(r)
 	td.CurrentYear = time.Now().Year()
 
 	// Use the PopString() method to retrieve the value for the "flash" key.
 	// PopString() also deletes the key and value from the session data, so it acts like a one-time fetch.
 	// If there's no matching key in the session data this will return the empty string.
 	td.Flash = app.session.PopString(r, "flash")
+
+	// Add the authentication status to the template data.
+	td.IsAuthenticated = app.isAuthenticated(r)
 	return td
 }
 
@@ -51,4 +57,8 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	}
 
 	buf.WriteTo(w)
+}
+
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.session.Exists(r, "authenticatedUserID")
 }
