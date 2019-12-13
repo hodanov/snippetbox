@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/justinas/nosurf"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -27,6 +28,8 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	if td == nil {
 		td = &templateData{}
 	}
+
+	td.CSRFToken = nosurf.Token(r)
 	td.CurrentYear = time.Now().Year()
 
 	// Use the PopString() method to retrieve the value for the "flash" key.
