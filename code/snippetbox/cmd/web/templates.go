@@ -5,6 +5,7 @@ import (
 	"github.com/hodanov/snippetbox/pkg/models"
 	"html/template"
 	"path/filepath"
+	"time"
 )
 
 type templateData struct {
@@ -47,4 +48,13 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
+}
+
+func humanDate(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+
+	// Convert the time to UTC before formatting it.
+	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
