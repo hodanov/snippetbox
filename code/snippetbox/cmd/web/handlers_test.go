@@ -35,7 +35,7 @@ func TestShowSnippet(t *testing.T) {
 		wantCode int
 		wantBody []byte
 	}{
-		{"Valid ID", "/snippet/1", http.StatusOK, []byte("An old silent pod...")},
+		{"Valid ID", "/snippet/1", http.StatusOK, []byte("An old silent pond...")},
 		{"Non-existent ID", "/snippet/2", http.StatusNotFound, nil},
 		{"Negative ID", "/snippet/-1", http.StatusNotFound, nil},
 		{"Decimal ID", "/snippet/1.23", http.StatusNotFound, nil},
