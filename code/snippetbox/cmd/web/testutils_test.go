@@ -3,14 +3,38 @@ package main
 import (
 	"github.com/golangcollege/sessions"
 	"github.com/hodanov/snippetbox/pkg/models/mock"
+	"html"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
+	"regexp"
 	"testing"
 	"time"
 )
+
+// Define a regular expression which captures the CSRF token value from the
+// HTML for our user signup page.
+var csrfTokenRX = regexp.MustCompile(`<input type="hidden" name="csrf_token" value='(.+)'>`)
+
+func extractCSRFToken(t *testing.T, body []byte) string {
+	// Use the FindSubmatch method to extract the token from the HTML body.
+	// This returns an array with the entire matched pattern in the
+	// first position, and the values of any captured data in the subsequent
+	// positions.
+	matches := csrfTokenRX.FindSubmatch(body)
+	if len(matches) < 2 {
+		t.Fatal("no csrf token found in body")
+	}
+
+	// Go's html/template package automatically escapes all dynamically
+	// rendered data (including CSRF token). For example, '+' character will
+	// be escaped to &#43;. Through html.UnescapeString() to get the original
+	// token value.
+	return html.UnescapeString(string(matches[1]))
+}
 
 // A newTestApplication is a helper which returns an instance of our
 // application struct containing mocked dependencies.
@@ -64,6 +88,24 @@ func newTestServer(t *testing.T, h http.Handler) *testServer {
 
 func (ts *testServer) get(t *testing.T, urlPath string) (int, http.Header, []byte) {
 	rs, err := ts.Client().Get(ts.URL + urlPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer rs.Body.Close()
+	body, err := ioutil.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return rs.StatusCode, rs.Header, body
+}
+
+// A postForm method for sending POST requests to the test server.
+// The final parameter to this method is a url.Values object which can contain
+// any data that you want to send in the request body.
+func (ts *testServer) postForm(t *testing.T, urlPath string, form url.Values) (int, http.Header, []byte) {
+	rs, err := ts.Client().PostForm(ts.URL+urlPath, form)
 	if err != nil {
 		t.Fatal(err)
 	}
